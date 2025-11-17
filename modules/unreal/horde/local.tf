@@ -65,6 +65,10 @@ locals {
       value = var.p4_port
     },
     {
+      name  = "Horde__pugins__build__Perforce__0__ServerAndPort"
+      value = var.p4_port
+    },
+    {
       name  = "ASPNETCORE_ENVIRONMENT"
       value = var.environment
     }
@@ -77,6 +81,14 @@ locals {
     },
     {
       name      = "Horde__Perforce__0__credentials__password"
+      valueFrom = var.p4_super_user_password_secret_arn
+    },
+    {
+      name      = "Horde__pugins__build__Perforce__0__credentials__username"
+      valueFrom = var.p4_super_user_username_secret_arn
+    },
+    {
+      name      = "Horde__pugins__build__Perforce__0__credentials__password"
       valueFrom = var.p4_super_user_password_secret_arn
     },
   ] : config.valueFrom != null ? config : null]

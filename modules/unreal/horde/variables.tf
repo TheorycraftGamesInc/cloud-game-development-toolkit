@@ -497,3 +497,31 @@ variable "enable_new_agents_by_default" {
   description = "Set this flag to automatically enable new agents that enroll with the Horde Server."
   default     = false
 }
+
+######################
+# HORDE CONFIG
+######################
+variable "server_json" {
+  type        = string
+  description = "Optional JSON string server configuration."
+  default     = ""
+}
+
+variable "globals_json" {
+  type        = string
+  description = "Optional JSON string global configuration."
+  default     = ""
+}
+
+variable "projects" {
+  type = list(object({
+    path = string
+    json = string
+    streams = list(object({
+      path = string
+      json = string
+    }))
+  }))
+  description = "Optional projects json definitions to store in the file system."
+  default     = []
+}

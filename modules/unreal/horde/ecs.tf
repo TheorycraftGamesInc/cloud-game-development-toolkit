@@ -35,6 +35,10 @@ resource "aws_ecs_task_definition" "unreal_horde_task_definition" {
     name = "unreal-horde-config"
   }
 
+  volume {
+    name = "unreal-horde-data"
+  }
+
   container_definitions = jsonencode(concat([
     {
       name  = var.container_name
@@ -99,6 +103,10 @@ resource "aws_ecs_task_definition" "unreal_horde_task_definition" {
         {
           sourceVolume  = "unreal-horde-config",
           containerPath = "/app/config"
+        },
+        {
+          sourceVolume  = "unreal-horde-data",
+          containerPath = "/app/Data"
         }
       ],
       dependsOn = concat(
@@ -145,6 +153,28 @@ resource "aws_ecs_task_definition" "unreal_horde_task_definition" {
         apt-get update
         apt-get install -y p4-cli
         p4 -p ${var.p4_port} trust -y
+        if [ -n "${var.server_json}" ]; then
+          cat > /app/Data/server.json <<'JSON'
+        ${var.server_json}
+        JSON
+        fi
+
+        %{ for project in var.projects ~}
+          %{ for stream in project.streams ~}
+            cat > /app/Data/${stream.path} <<'JSON'
+        ${stream.json}
+        JSON
+          %{ endfor ~}
+          cat > /app/Data/${project.path} <<'JSON'
+        ${project.json}
+        JSON
+        %{ endfor ~}
+
+        if [ -n "${var.globals_json}" ]; then
+          cat > /app/Data/globals.json <<'JSON'
+        ${var.globals_json}
+        JSON
+        fi
       EOF
       ]
       readonly_root_filesystem = false
@@ -152,6 +182,10 @@ resource "aws_ecs_task_definition" "unreal_horde_task_definition" {
         {
           sourceVolume  = "unreal-horde-config",
           containerPath = "/app/config"
+        },
+        {
+          sourceVolume  = "unreal-horde-data",
+          containerPath = "/app/Data"
         }
       ]
       environment = [

@@ -100,13 +100,16 @@ resource "aws_iam_role" "unreal_horde_agent_default_role" {
   tags = local.tags
 }
 
-resource "aws_iam_role_policy_attachments_exclusive" "unreal_horde_agent_policy_attachments" {
-  count     = length(var.agents) > 0 ? 1 : 0
-  role_name = aws_iam_role.unreal_horde_agent_default_role[0].name
-  policy_arns = [
-    "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
-    aws_iam_policy.horde_agents_s3_policy[0].arn
-  ]
+resource "aws_iam_role_policy_attachment" "unreal_horde_agent_amazon_ssm_managed_policy_attachments" {
+  count      = length(var.agents) > 0 ? 1 : 0
+  role       = aws_iam_role.unreal_horde_agent_default_role[0].name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_role_policy_attachment" "unreal_horde_agent_s3_policy_attachments" {
+  count      = length(var.agents) > 0 ? 1 : 0
+  role       = aws_iam_role.unreal_horde_agent_default_role[0].name
+  policy_arn = aws_iam_policy.horde_agents_s3_policy[0].arn
 }
 
 # Instance Profile
